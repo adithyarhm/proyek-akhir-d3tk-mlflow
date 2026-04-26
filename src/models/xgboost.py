@@ -2,7 +2,7 @@ from sklearn.multioutput import MultiOutputRegressor
 from xgboost import XGBRegressor
 from src.config import * 
     
-def xgboost_model(X_train, y_train, X_test):
+def xgboost_model(X_train, y_train):
     """
     Ini untuk build model XGBoost
     """
@@ -13,6 +13,5 @@ def xgboost_model(X_train, y_train, X_test):
     # Train XGBoost pakai MultiOutputRegressor
     xgb = MultiOutputRegressor(xgb_model)
     xgb.fit(X_train, y_train)                       # training
-    y_pred = xgb.predict(X_test)                    # inference
     
-    return xgb, y_pred                              # balikin model & prediksi
+    return xgb                                      # balikin model
