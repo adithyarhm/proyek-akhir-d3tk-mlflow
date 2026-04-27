@@ -34,3 +34,7 @@ TEST_SIZE = 0.2
 
 # Number of Nodes
 NUM_NODES = 6
+
+# MLflow
+MLFLOW_EXPERIMENT_NAME = "gas-belerang-forecasting"
+MLFLOW_TRACKING_URI = "mlruns"

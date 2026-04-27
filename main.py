@@ -1,12 +1,11 @@
 """
 MAIN PROGRAM
 =================
-Seluruh pipeline ML (per-node):
+Seluruh pipeline ML (per-node) dengan MLflow tracking:
   1. Pengambilan Data   - memuat & menggabungkan CSV node mentah
   2. Pra-pemrosesan     - penanganan outlier + feature engineering
-  3. Pelatihan          - melatih 4 model per node (total 24 model)
+  3. Pelatihan          - melatih 4 model per node + log ke MLflow
   4. Evaluasi           - menampilkan metrik akhir pada data uji per-node
-  5. (Opsional) Simpan  - menyimpan model yang telah dilatih per-node
 """
 
 
@@ -14,7 +13,6 @@ from src.config import *
 from src.data.data_loader import load_and_merge_raw_nodes, load_data
 from src.preprocess import preprocess_pipeline
 from src.train import train_model
-from src.save_models import save_trained_models
 import pandas as pd
 
 
@@ -27,7 +25,7 @@ MODEL_DISPLAY_NAMES = {
 
 
 def main():
-    # -- Step 1: Pengambilan Data --------------------------------
+    # -- Step 1: Pengambilan Data
     print("=" * 60)
     print("STEP 1: Memuat dan menggabungkan data mentah dari node ...")
     print("=" * 60)
@@ -35,21 +33,21 @@ def main():
     print(f"  -> Bentuk data gabungan: {df_raw.shape}")
 
 
-    # -- Step 2: Preprocessing & Feature Engineering ---------------
+    # -- Step 2: Preprocessing & Feature Engineering
     print("\n" + "=" * 60)
     print("STEP 2: Preprocessing (penanganan outlier + Feature Engineering) ...")
     print("=" * 60)
     df_processed = preprocess_pipeline(df_raw)
     print(f"  -> Bentuk data setelah proses: {df_processed.shape}")
 
-    # (Opsional) Simpan data hasil pemrosesan untuk inspeksi / caching
+    # Simpan data hasil pemrosesan untuk inspeksi / caching
     df_processed.to_csv(NODE_COMBINED_FINAL, index=False)
     print(f"  -> Data hasil pemrosesan disimpan ke {NODE_COMBINED_FINAL}")
 
 
-    # -- Step 3: Training Per-Node --------------------------------
+    # -- Step 3: Training Per-Node + MLflow Tracking
     print("\n" + "=" * 60)
-    print("STEP 3: Training model per-node ...")
+    print("STEP 3: Training model per-node (+ MLflow tracking) ...")
     print("=" * 60)
 
     # Menghapus baris dengan NaN akibat fitur diff/ratio
@@ -59,7 +57,7 @@ def main():
     all_results = train_model(df_clean)
 
 
-    # -- Step 4: Evaluasi Per-Node ---------------------------------
+    # -- Step 4: Evaluasi Per-Node
     print("\n" + "=" * 60)
     print("STEP 4: Metrik Akhir pada Data Uji (Per-Node)")
     print("=" * 60)
@@ -79,16 +77,11 @@ def main():
                       f"R2={test_met['r2']:.4f}")
 
 
-    # -- Step 5: Simpan Model (aktifkan jika diperlukan) -----------
-    # print("\n" + "=" * 60)
-    # print("STEP 5: Menyimpan model per-node ...")
-    # print("=" * 60)
-    # save_trained_models(all_results)
-
-
     print("\n" + "=" * 60)
     print("Pipeline selesai [OK]")
     print("=" * 60)
+    print("\n  Jalankan 'mlflow ui' untuk melihat dashboard MLflow.")
+    print("  Buka http://localhost:5000 di browser.")
 
 
 if __name__ == "__main__":
